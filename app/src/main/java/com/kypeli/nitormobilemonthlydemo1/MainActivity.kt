@@ -6,12 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,19 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.tooling.preview.Preview
-import com.kypeli.nitormobilemonthlydemo1.ui.theme.Model
+import com.kypeli.nitormobilemonthlydemo1.ui.theme.ListModel
 import com.kypeli.nitormobilemonthlydemo1.ui.theme.NitorMobileMonthlyDemo1Theme
-import org.w3c.dom.Text
 
 class MainActivity : ComponentActivity() {
     @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val model = ListModel()
+        model.addItem()
+
         setContent {
             NitorMobileMonthlyDemo1Theme {
-                MainView()
+                MainView(model)
             }
         }
     }
@@ -44,40 +40,46 @@ class MainActivity : ComponentActivity() {
 
 @ExperimentalAnimationApi
 @Composable
-fun MainView() {
-    val model = remember { Model() }
-    val items = remember { mutableStateListOf(model.addItem()) }
-    var selectedItem by remember { mutableStateOf<ListItem?>(null) }
-
-    Column {
-        List(items, selectedItem) { item ->
-            selectedItem = item
-        }
-        Button(
-            modifier = Modifier.padding(start = 12.dp, top = 12.dp),
-            onClick = { items.add(model.addItem()) }
-        ) {
-            Text("More")
-        }
-    }
+fun MainView(listModel: ListModel) {
+    val items = listModel.items
+    val onSelect = { item: ListItem -> listModel.setSelected(item) }
+    val onAddMore = { listModel.addItem() }
+    val onAdd100 = { repeat(100) { listModel.addItem() } }
+    ItemList(items, onSelect, onAddMore, onAdd100)
 }
 
 @ExperimentalAnimationApi
 @Composable
-fun List(
+fun ItemList(
     rows: List<ListItem>,
-    selectedItem: ListItem?,
-    onSelect: (ListItem) -> Unit
+    onSelect: (ListItem) -> Unit,
+    onAddMore: () -> Unit,
+    onAdd100: () -> Unit
 ) {
     LazyColumn {
         items(rows) { item ->
             ListRow(
                 item = item,
-                selected = item == selectedItem,
-                modifier = Modifier.clickable {
-                    onSelect(item)
-                }
+                selected = item.isSelected,
+                modifier = Modifier.clickable { onSelect(item) }
             )
+        }
+        item {
+            Row {
+                Button(
+                    modifier = Modifier.padding(start = 12.dp, top = 12.dp),
+                    onClick = { onAddMore() }
+                ) {
+                    Text("More")
+                }
+
+                Button(
+                    modifier = Modifier.padding(start = 12.dp, top = 12.dp),
+                    onClick = { onAdd100() }
+                ) {
+                    Text("Lots more")
+                }
+            }
         }
     }
 }
@@ -106,12 +108,17 @@ fun ListRow(
             modifier = Modifier.weight(1f)
         )
         AnimatedVisibility(visible = selected) {
-            Text(
-                text = "Selected",
-                style = MaterialTheme.typography.h1,
-                color = MaterialTheme.colors.secondary,
-                modifier = Modifier.padding(start = 12.dp, end = 12.dp),
-            )
+            Box(modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.Gray)
+            ) {
+                Text(
+                    text = "Selected",
+                    style = MaterialTheme.typography.h1,
+                    color = MaterialTheme.colors.secondary,
+                    modifier = Modifier.padding(start = 12.dp, end = 12.dp)
+                )
+            }
         }
     }
 }
@@ -138,18 +145,17 @@ fun ListRow(
 
 
 
-@ExperimentalAnimationApi
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    NitorMobileMonthlyDemo1Theme {
-        List(
-            rows = listOf(
-                ListItem("First"),
-                ListItem("Second")
-            ),
-            null,
-            {}
-        )
-    }
-}
+// @ExperimentalAnimationApi
+// @Preview(showBackground = true)
+// @Composable
+// fun DefaultPreview() {
+//     NitorMobileMonthlyDemo1Theme {
+//         List(
+//             rows = listOf(
+//                 ListItem("First"),
+//                 ListItem("Second", selected = true)
+//             ),
+//             {}
+//         )
+//     }
+// }
