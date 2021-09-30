@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kypeli.nitormobilemonthlydemo1.ui.theme.ListModel
 import com.kypeli.nitormobilemonthlydemo1.ui.theme.NitorMobileMonthlyDemo1Theme
@@ -45,19 +46,9 @@ fun MainView(listModel: ListModel) {
     val onSelect = { item: ListItem -> listModel.setSelected(item) }
     val onAddMore = { listModel.addItem() }
     val onAdd100 = { repeat(100) { listModel.addItem() } }
-    ItemList(items, onSelect, onAddMore, onAdd100)
-}
 
-@ExperimentalAnimationApi
-@Composable
-fun ItemList(
-    rows: List<ListItem>,
-    onSelect: (ListItem) -> Unit,
-    onAddMore: () -> Unit,
-    onAdd100: () -> Unit
-) {
     LazyColumn {
-        items(rows) { item ->
+        items(items) { item ->
             ListRow(
                 item = item,
                 selected = item.isSelected,
@@ -145,17 +136,12 @@ fun ListRow(
 
 
 
-// @ExperimentalAnimationApi
-// @Preview(showBackground = true)
-// @Composable
-// fun DefaultPreview() {
-//     NitorMobileMonthlyDemo1Theme {
-//         List(
-//             rows = listOf(
-//                 ListItem("First"),
-//                 ListItem("Second", selected = true)
-//             ),
-//             {}
-//         )
-//     }
-// }
+@ExperimentalAnimationApi
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    val model by remember { mutableStateOf(ListModel().also { it.addItem() })}
+    NitorMobileMonthlyDemo1Theme {
+        MainView(model)
+    }
+}
